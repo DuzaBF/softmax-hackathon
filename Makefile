@@ -23,7 +23,7 @@ lib :
 	${AR} crD ${LIB_DIR}/lib${LIB_NAME}.a ${BIN_DIR}/${LIB_NAME}.o
 
 run : app
-	${BIN_DIR}/test
+	${BIN_DIR}/test -f ${BIN_DIR}/data -g ${BIN_DIR}/golden
 
 clean :
 	rm -rf ${BIN_DIR}
