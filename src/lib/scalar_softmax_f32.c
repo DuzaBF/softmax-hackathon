@@ -17,7 +17,7 @@ float delta(const float in) {
 }
 
 float fast_pow2(const float in) {
-    // assert(in < 0);
+    assert(in <= 0.0f);
     const float yf = in - (int32_t)(in) + 1;
     u_float_int_t value;
     value.i = (int32_t)((1 << 23) * (in - delta(yf) + 127));
