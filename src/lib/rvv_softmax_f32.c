@@ -26,5 +26,6 @@ float fast_pow2(const float in) {
 // Softmax Functions
 int32_t rvv_softmax_f32(const float* in_vec, uint32_t size, float* out_vec) {
     (void)k1OverLn2;
+    
     return 0;
 }

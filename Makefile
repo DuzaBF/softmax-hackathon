@@ -40,7 +40,9 @@ RVV_APP_CFLAG=${COMMON_FLAG} -Wno-unused-but-set-variable -march=rv64iv -mabi=lp
 
 app-rvv : lib-rvv
 	mkdir -p ${BIN_DIR}
-	${RISCV_CC} ${SRC_DIR}/rvv_main.c -o ${BIN_DIR}/rvv-test ${RVV_APP_CFLAG} ${RVV_APP_LFLAG}
+	${RISCV_CC} ${SRC_DIR}/rvv_main.c -o ${BIN_DIR}/rvv-test ${RVV_APP_CFLAG} ${RVV_APP_LFLAG} -Wl,-T ${SRC_DIR}/arch.link.ld
+	${RISCV_TOOLCHAIN}/bin/riscv64-unknown-elf-objdump ./bin/rvv-test -D > ./bin/dump
+	${RISCV_TOOLCHAIN}/bin/riscv64-unknown-elf-objdump ./bin/rvv-test -h > ./bin/mem
 
 lib-rvv :
 	mkdir -p ${BIN_DIR}
