@@ -10,7 +10,7 @@ LIB_DIR=${BIN_DIR}/lib
 COMMON_FLAG=-O3 -Wall -Werror
 LIB_CFLAG=${COMMON_FLAG} -fno-strict-aliasing -c
 APP_CFLAG=${COMMON_FLAG} -Wno-unused-but-set-variable
-APP_LFLAG=-l${LIB_NAME} -L${LIB_DIR}
+APP_LFLAG=-l${LIB_NAME} -L${LIB_DIR} -lm
 
 app : lib
 	mkdir -p ${BIN_DIR}
@@ -23,7 +23,7 @@ lib :
 	${AR} crD ${LIB_DIR}/lib${LIB_NAME}.a ${BIN_DIR}/${LIB_NAME}.o
 
 run : app
-	${BIN_DIR}/test -f ${BIN_DIR}/data -g ${BIN_DIR}/golden
+	${BIN_DIR}/test -f ${BIN_DIR}/fp32_in1.bin -g ${BIN_DIR}/softmax_f32_golden3.bin
 
 clean :
 	rm -rf ${BIN_DIR}

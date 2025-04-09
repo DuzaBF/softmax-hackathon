@@ -38,13 +38,12 @@ rvv_insn exp{
           flt_x = (flt_x > (float32_t)EXP_F32_MIN_FP32)? flt_x : (float32_t)EXP_F32_MIN_FP32;
           flt_x = (flt_x < (float32_t)EXP_F32_MAX_FP32)? flt_x : (float32_t)EXP_F32_MAX_FP32;
 
-          flt_x = 1.4426950409*flt_x;
+          flt_x = 1.4426950409f*flt_x;
           const float frac = flt_x - (int32_t)(flt_x) + 1;
           const float s1 = 0.30758037765820823f;
           const float s2 = -0.23141283591588344f;
-          const float s3 = -7.6167541742324804e-2f;
+          const float s3 = -0.076167541742324804f;
           const float delta = s1 * frac + s2 * frac * frac + s3 * frac * frac * frac;
-
           u_hex_fp32_t v;
           v.hex = (1<<23)*(flt_x - delta + 127);
 
