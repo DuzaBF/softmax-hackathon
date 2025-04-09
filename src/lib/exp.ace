@@ -39,7 +39,8 @@ rvv_insn exp{
           flt_x = (flt_x < (float32_t)EXP_F32_MAX_FP32)? flt_x : (float32_t)EXP_F32_MAX_FP32;
 
           flt_x = 1.4426950409f*flt_x;
-          const float frac = flt_x - (int32_t)(flt_x) + 1;
+          double _;
+          const float frac = std::modf(flt_x, &_) + 1; // warning rounding
           const float s1 = 0.30758037765820823f;
           const float s2 = -0.23141283591588344f;
           const float s3 = -0.076167541742324804f;
