@@ -1,0 +1,64 @@
+cpu {
+  name = AX45MPV;
+  elen = 64;
+  flen = 64;
+  felen = 64;
+  vlen = 512;
+  dlen = 512;
+};
+
+csim_header = %{
+  //For fp32, exp(x) is valid in the range -87.3f to 88.7f.
+  #define EXP_F32_MAX_FP32  88.7f
+  #define EXP_F32_MIN_FP32  -87.3f
+%};
+
+csim = %{
+  union UnionHexFloat {
+    uint32_t  hex;
+    float32_t flt;
+    UnionHexFloat() {}
+  };
+  using u_hex_fp32_t = UnionHexFloat;
+%};
+
+rvv_insn exp{
+  operand = {out vr:fp result, in vr:fp x};
+  vector_mask = none;
+
+  csim = %{
+    unsigned csr_vtype_vsew = (csr_vtype >> 3) & 0x7;
+    switch(csr_vtype_vsew) {
+      //sew = 32
+      case 2: {
+        //elen = 64, each elements has 2 f32 points
+        for(unsigned int j = 0; j < 2; j++) {
+
+          float32_t flt_x = x.f32[j];
+          flt_x = (flt_x > (float32_t)EXP_F32_MIN_FP32)? flt_x : (float32_t)EXP_F32_MIN_FP32;
+          flt_x = (flt_x < (float32_t)EXP_F32_MAX_FP32)? flt_x : (float32_t)EXP_F32_MAX_FP32;
+
+          flt_x = 1.4426950409*flt_x;
+          const float frac = flt_x - (int32_t)(flt_x) + 1;
+          const float s1 = 0.30758037765820823f;
+          const float s2 = -0.23141283591588344f;
+          const float s3 = -7.6167541742324804e-2f;
+          const float delta = s1 * frac + s2 * frac * frac + s3 * frac * frac * frac;
+
+          u_hex_fp32_t v;
+          v.hex = (1<<23)*(flt_x - delta + 127);
+
+          result.f32[j] = v.flt;
+        }
+        break;
+      }
+      default:{
+        cout<<"ERROR:Unsupported SEW value!"<<std::endl;
+        assert(0);
+      }
+    }
+  %};
+
+  latency = 6;
+  cpr = 1;
+};
