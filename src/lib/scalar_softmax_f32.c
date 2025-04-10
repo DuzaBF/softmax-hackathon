@@ -2,16 +2,34 @@
 
 #include <stdio.h>
 
+// #define CORR_POL_0
+// #define CORR_POL_3
+#define CORR_POL_5
+
 static const float k1OverLn2 = 1.44269504089f;
 
-#if 1
+#ifdef CORR_POL_5
+static float delta(const float in) {
+    const float s1 =  3.06852819440055e-1f;
+    const float s2 = -2.40226506959101e-1f;
+    const float s3 = -5.57129652016652e-2f;
+    const float s4 = -9.01146535969578e-3f;
+    const float s5 = -1.90188191959304e-3f;
+    const float p1 = in;
+    const float p2 = p1 * in;
+    const float p3 = p2 * in;
+    const float p4 = p3 * in;
+    const float p5 = p4 * in;
+    return s1 * p1 + s2 * p2 + s3 * p3 + s4 * p4 + s5 * p5;
+}
+#elif defined(CORR_POL_3)
 static float delta(const float in) {
     const float s1 = 0.30758037765820823f;
     const float s2 = -0.23141283591588344f;
     const float s3 = -0.076167541742324804f;
     return s1 * in + s2 * in * in + s3 * in * in * in;
 }
-#else
+#elif defined(CORR_POL_0)
 static float delta(const float in) {
     static const float kC = 0.05798480f;
     return kC;

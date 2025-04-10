@@ -41,10 +41,17 @@ rvv_insn exp{
           flt_x = 1.4426950409f*flt_x;
           double _;
           const float frac = std::modf(flt_x, &_) + 1; // warning rounding
-          const float s1 = 0.30758037765820823f;
-          const float s2 = -0.23141283591588344f;
-          const float s3 = -0.076167541742324804f;
-          const float delta = s1 * frac + s2 * frac * frac + s3 * frac * frac * frac;
+          const float s1 =  3.06852819440055e-1f;
+          const float s2 = -2.40226506959101e-1f;
+          const float s3 = -5.57129652016652e-2f;
+          const float s4 = -9.01146535969578e-3f;
+          const float s5 = -1.90188191959304e-3f;
+          const float p1 = frac;
+          const float p2 = p1 * frac;
+          const float p3 = p2 * frac;
+          const float p4 = p3 * frac;
+          const float p5 = p4 * frac;
+          const float delta = s1 * p1 + s2 * p2 + s3 * p3 + s4 * p4 + s5 * p5;
           u_hex_fp32_t v;
           v.hex = (1<<23)*(flt_x - delta + 127);
 
