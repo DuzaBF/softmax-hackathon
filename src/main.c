@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 #include "lib/scalar_softmax_f32.h"
-#define SIZE 2048 // Change golden image crroding to size
+#define SIZE 2048 // Change golden image according to the size
 
 void read_floats(float *dst, const char *name) {
     FILE *fptr;

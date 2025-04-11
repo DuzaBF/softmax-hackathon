@@ -10,7 +10,7 @@ static const float k1OverLn2 = 1.44269504089f;
 
 #ifdef CORR_POL_5
 static float delta(const float in) {
-    const float s1 =  3.06852819440055e-1f;
+    const float s1 = 3.06852819440055e-1f;
     const float s2 = -2.40226506959101e-1f;
     const float s3 = -5.57129652016652e-2f;
     const float s4 = -9.01146535969578e-3f;
@@ -41,7 +41,7 @@ static float fast_pow2(const float in) {
     u_float_int_t value;
     value.i32 = (int32_t)((1 << 23) * (in - delta(yf) + 127.0f));
 #if 0
-    printf("in % 2.04f | val %#010x  % 2.04f\r\n", in, value.i32,
+    printf("in % 2.04f | frac % 2.04f |  val %#010x  % 2.04f\r\n", in, yf, value.i32,
            value.f32);
 #endif
     return value.f32;
