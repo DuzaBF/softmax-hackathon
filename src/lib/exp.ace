@@ -69,3 +69,4 @@ rvv_insn exp{
   latency = 6;
   cpr = 1;
 };
+
