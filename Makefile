@@ -23,7 +23,7 @@ lib :
 	${AR} crD ${LIB_DIR}/lib${LIB_NAME}.a ${BIN_DIR}/${LIB_NAME}.o
 
 run : app
-	${BIN_DIR}/test -f ${BIN_DIR}/fp32_in1.bin -g ${BIN_DIR}/softmax_f32_golden3.bin
+	${BIN_DIR}/test -f ${BIN_DIR}/data -g ${BIN_DIR}/golden
 
 clean :
 	rm -rf ${BIN_DIR}
