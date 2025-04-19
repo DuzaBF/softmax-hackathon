@@ -4,7 +4,10 @@
 #include <unistd.h>
 
 #include "lib/scalar_softmax_f32.h"
+#include "lib/rvv_softmax_f32.h"
+#ifndef SIZE
 #define SIZE 2048 // Change golden image according to the size
+#endif
 
 void read_floats(float *dst, const char *name) {
     FILE *fptr;
@@ -63,6 +66,7 @@ void check(const float *in, const float *out, const float *golden) {
 }
 
 int main(int argc, char *argv[]) {
+    printf("Softmax size=%d\r\n", SIZE);
     float in[SIZE] = {0.0f};
     float out[SIZE] = {0.0f};
     float golden[SIZE] = {0.0f};
@@ -83,7 +87,11 @@ int main(int argc, char *argv[]) {
         }
     }
     uint32_t size = SIZE;
+#ifdef USE_RVV
+    rvv_softmax_f32(in, size, out);
+#else
     scalar_softmax_f32(in, size, out);
+#endif
     check(in, out, golden);
     return ret;
 }

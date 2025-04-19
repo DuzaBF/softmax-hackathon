@@ -14,9 +14,16 @@ make run
 
 ## RVV solution
 
-WIP: cross-compiles to the RISC-V core machine and uses Spike simulator to run the program.
+Cross-compiles to the RISC-V core machine and uses Spike simulator to run the program.
+Provide path to RISC-V gcc and Spike with proxy kernel:
 ```bash
-make rvv-run
+export RISCV_TOOLCHAIN={install_dir}/riscv-gcc
+export SPIKE_PATH={install_dir}/riscv-isa-sim/bin
+export PK_PATH={install_dir}/riscv64-unknown-elf/bin
+```
+
+```bash
+make run-rvv
 ```
 
 ## ACE custom instruction

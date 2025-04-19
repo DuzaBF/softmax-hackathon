@@ -29,20 +29,21 @@ clean :
 	rm -rf ${BIN_DIR}
 
 RISCV_CC=${RISCV_TOOLCHAIN}/bin/riscv64-unknown-elf-gcc
+RISCV_OBJDUMP=${RISCV_TOOLCHAIN}/bin/riscv64-unknown-elf-objdump
 RISCV_AR=${RISCV_TOOLCHAIN}/bin/riscv64-unknown-elf-gcc-ar
 RISCV_LIB_DIR=${RISCV_TOOLCHAIN}/lib
 RISCV_INCLUDE_DIR=${RISCV_TOOLCHAIN}/lib/gcc/riscv64-unknown-elf/13.2.0
 RISCV_SPIKE=${SPIKE_PATH}/spike
 RVV_LIB_NAME=rvv_softmax_f32
-RVV_LIB_CFLAG=${COMMON_FLAG} -fno-strict-aliasing -c -march=rv64iv -mabi=lp64
-RVV_APP_LFLAG=-l${RVV_LIB_NAME} -L${LIB_DIR} -L${RISCV_LIB_DIR} -I${RISCV_INCLUDE_DIR} 
-RVV_APP_CFLAG=${COMMON_FLAG} -Wno-unused-but-set-variable -march=rv64iv -mabi=lp64
+RVV_LIB_CFLAG=${COMMON_FLAG} -fno-strict-aliasing -c
+RVV_APP_LFLAG=-l${RVV_LIB_NAME} -L${LIB_DIR} -L${RISCV_LIB_DIR} -lm -I${RISCV_INCLUDE_DIR}
+RVV_APP_CFLAG=${COMMON_FLAG} -Wno-unused-but-set-variable
 
 app-rvv : lib-rvv
 	mkdir -p ${BIN_DIR}
-	${RISCV_CC} ${SRC_DIR}/rvv_main.c -o ${BIN_DIR}/rvv-test ${RVV_APP_CFLAG} ${RVV_APP_LFLAG} -Wl,-T ${SRC_DIR}/arch.link.ld
-	${RISCV_TOOLCHAIN}/bin/riscv64-unknown-elf-objdump ./bin/rvv-test -D > ./bin/dump
-	${RISCV_TOOLCHAIN}/bin/riscv64-unknown-elf-objdump ./bin/rvv-test -h > ./bin/mem
+	${RISCV_CC} ${SRC_DIR}/main.c -DUSE_RVV -o ${BIN_DIR}/rvv-test ${RVV_APP_CFLAG} ${RVV_APP_LFLAG}
+	${RISCV_OBJDUMP} ./bin/rvv-test -D > ./bin/dump
+	${RISCV_OBJDUMP} ./bin/rvv-test -h > ./bin/mem
 
 lib-rvv :
 	mkdir -p ${BIN_DIR}
@@ -51,4 +52,4 @@ lib-rvv :
 	${RISCV_AR} crD ${LIB_DIR}/lib${RVV_LIB_NAME}.a ${BIN_DIR}/${RVV_LIB_NAME}.o
 
 run-rvv : app-rvv
-	${RISCV_SPIKE} --isa=RV64IV -m0x10000:0x8000 ${BIN_DIR}/rvv-test 
+	${RISCV_SPIKE} --isa=rv64gcv ${PK_PATH}/pk ./bin/rvv-test -f ${BIN_DIR}/data -g ${BIN_DIR}/golden

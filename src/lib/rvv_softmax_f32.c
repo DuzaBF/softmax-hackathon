@@ -1,5 +1,7 @@
 
 
+#include "rvv_softmax_f32.h"
+
 #include <riscv_vector.h>
 
 static float rvv_find_max(const float *in_vec, uint32_t size) {
@@ -27,11 +29,11 @@ static float rvv_find_max(const float *in_vec, uint32_t size) {
     return max;
 }
 
-#define USE_ACE
+// #define USE_ACE
 // Softmax Functions
 #ifdef USE_ACE
 #include "ace_user.h"
-//vfloat32m8_t ace_exp_f32m8(vfloat32m8_t x, size_t vl);
+// vfloat32m8_t ace_exp_f32m8(vfloat32m8_t x, size_t vl);
 int32_t rvv_ace_softmax_f32(const float *in_vec, uint32_t size,
                             float *out_vec) {
     float max = rvv_find_max(in_vec, size);
@@ -53,7 +55,7 @@ int32_t rvv_ace_softmax_f32(const float *in_vec, uint32_t size,
 
         // Substract max
         vData = __riscv_vfsub_vf_f32m8(vData, max, vl);
-        //exp_f32
+        // exp_f32
         vData = ace_exp_f32m8(vData, vl);
 
         vSum = __riscv_vfadd_vv_f32m8(vSum, vData, vl);  // accumulate
@@ -87,7 +89,6 @@ int32_t rvv_ace_softmax_f32(const float *in_vec, uint32_t size,
 // #define SIZE 3
 // #include <stdio.h>
 static const float k1OverLn2 = 1.44269504089f;
-
 
 static vfloat32m8_t rvv_get_frac(const vfloat32m8_t vIn, size_t vl) {
     vint32m8_t vInt = __riscv_vmv_v_x_i32m8(0, vl);
