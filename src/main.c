@@ -1,12 +1,78 @@
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
-#include "lib/scalar_softmax_f32.h"
 #include "lib/rvv_softmax_f32.h"
+#include "lib/scalar_softmax_f32.h"
 #ifndef SIZE
-#define SIZE 2048 // Change golden image according to the size
+#define SIZE 2048  // Change golden image according to the size
+#endif
+
+#ifdef __linux__
+#include <err.h>
+#include <linux/perf_event.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+static long perf_event_open(struct perf_event_attr *hw_event, pid_t pid,
+                            int cpu, int group_fd, unsigned long flags) {
+    int ret;
+
+    ret = syscall(SYS_perf_event_open, hw_event, pid, cpu, group_fd, flags);
+    return ret;
+}
+
+static int start_inst_count() {
+    int fd;
+    struct perf_event_attr pe;
+
+    memset(&pe, 0, sizeof(pe));
+    pe.type = PERF_TYPE_HARDWARE;
+    pe.size = sizeof(pe);
+    pe.config = PERF_COUNT_HW_INSTRUCTIONS;
+    pe.disabled = 1;
+    pe.exclude_kernel = 1;
+    pe.exclude_hv = 1;
+
+    fd = perf_event_open(&pe, 0, -1, -1, 0);
+    if (fd == -1) err(EXIT_FAILURE, "Error opening leader %llx\n", pe.config);
+
+    if (ioctl(fd, PERF_EVENT_IOC_RESET, 0) == -1)
+        err(EXIT_FAILURE, "PERF_EVENT_IOC_RESET");
+    if (ioctl(fd, PERF_EVENT_IOC_ENABLE, 0) == -1)
+        err(EXIT_FAILURE, "PERF_EVENT_IOC_ENABLE");
+
+    return fd;
+}
+
+static void end_inst_count(int fd) {
+    long long count;
+    if (ioctl(fd, PERF_EVENT_IOC_DISABLE, 0) == -1)
+        err(EXIT_FAILURE, "PERF_EVENT_IOC_DISABLE");
+    if (read(fd, &count, sizeof(count)) != sizeof(count))
+        err(EXIT_FAILURE, "read");
+
+    printf("Used %lld instructions\n", count);
+
+    if (close(fd) == -1) err(EXIT_FAILURE, "close");
+}
+#else
+static int start_inst_count() {
+    int counter;
+    asm volatile("rdinstret %0" : "=r"(counter));
+    printf("rdinstret %d\n", counter);
+    return counter;
+}
+static void end_inst_count(int fd) {
+    int counter;
+    asm volatile("rdinstret %0" : "=r"(counter));
+    printf("rdinstret %d\n", counter);
+    int count = counter - fd;
+    printf("Used %d instructions\n", count);
+}
 #endif
 
 void read_floats(float *dst, const char *name) {
@@ -87,11 +153,14 @@ int main(int argc, char *argv[]) {
         }
     }
     uint32_t size = SIZE;
+
+    int fd = start_inst_count();
 #ifdef USE_RVV
     rvv_softmax_f32(in, size, out);
 #else
     scalar_softmax_f32(in, size, out);
 #endif
+    end_inst_count(fd);
     check(in, out, golden);
     return ret;
 }

@@ -53,3 +53,18 @@ lib-rvv :
 
 run-rvv : app-rvv
 	${RISCV_SPIKE} --isa=rv64gcv ${PK_PATH}/pk ./bin/rvv-test -f ${BIN_DIR}/data -g ${BIN_DIR}/golden
+
+app-riscv : lib-riscv
+	mkdir -p ${BIN_DIR}
+	${RISCV_CC} ${SRC_DIR}/main.c -o ${BIN_DIR}/riscv-test ${APP_CFLAG} ${APP_LFLAG}
+	${RISCV_OBJDUMP} ./bin/riscv-test -D > ./bin/dump
+	${RISCV_OBJDUMP} ./bin/riscv-test -h > ./bin/mem
+
+lib-riscv :
+	mkdir -p ${BIN_DIR}
+	mkdir -p ${LIB_DIR}
+	${RISCV_CC} ${LIB_SRC_DIR}/${LIB_NAME}.c -o ${BIN_DIR}/${LIB_NAME}.o ${RVV_LIB_CFLAG}
+	${RISCV_AR} crD ${LIB_DIR}/lib${LIB_NAME}.a ${BIN_DIR}/${LIB_NAME}.o
+
+run-riscv : app-riscv
+	${RISCV_SPIKE} --isa=rv64gcv ${PK_PATH}/pk ./bin/riscv-test -f ${BIN_DIR}/data -g ${BIN_DIR}/golden
