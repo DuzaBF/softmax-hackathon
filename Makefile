@@ -41,14 +41,14 @@ RVV_APP_CFLAG=${COMMON_FLAG} -Wno-unused-but-set-variable
 
 app-rvv : lib-rvv
 	mkdir -p ${BIN_DIR}
-	${RISCV_CC} ${SRC_DIR}/main.c -DUSE_RVV -o ${BIN_DIR}/rvv-test ${RVV_APP_CFLAG} ${RVV_APP_LFLAG}
+	${RISCV_CC} -march=rv64gcv ${SRC_DIR}/main.c -DUSE_RVV -o ${BIN_DIR}/rvv-test ${RVV_APP_CFLAG} ${RVV_APP_LFLAG}
 	${RISCV_OBJDUMP} ./bin/rvv-test -D > ./bin/dump
 	${RISCV_OBJDUMP} ./bin/rvv-test -h > ./bin/mem
 
 lib-rvv :
 	mkdir -p ${BIN_DIR}
 	mkdir -p ${LIB_DIR}
-	${RISCV_CC} ${LIB_SRC_DIR}/${RVV_LIB_NAME}.c -o ${BIN_DIR}/${RVV_LIB_NAME}.o ${RVV_LIB_CFLAG}
+	${RISCV_CC} -march=rv64gcv ${LIB_SRC_DIR}/${RVV_LIB_NAME}.c -o ${BIN_DIR}/${RVV_LIB_NAME}.o ${RVV_LIB_CFLAG}
 	${RISCV_AR} crD ${LIB_DIR}/lib${RVV_LIB_NAME}.a ${BIN_DIR}/${RVV_LIB_NAME}.o
 
 run-rvv : app-rvv
@@ -56,14 +56,14 @@ run-rvv : app-rvv
 
 app-riscv : lib-riscv
 	mkdir -p ${BIN_DIR}
-	${RISCV_CC} ${SRC_DIR}/main.c -o ${BIN_DIR}/riscv-test ${APP_CFLAG} ${APP_LFLAG}
+	${RISCV_CC} -march=rv64gc ${SRC_DIR}/main.c -o ${BIN_DIR}/riscv-test ${APP_CFLAG} ${APP_LFLAG} 
 	${RISCV_OBJDUMP} ./bin/riscv-test -D > ./bin/dump
 	${RISCV_OBJDUMP} ./bin/riscv-test -h > ./bin/mem
 
 lib-riscv :
 	mkdir -p ${BIN_DIR}
 	mkdir -p ${LIB_DIR}
-	${RISCV_CC} ${LIB_SRC_DIR}/${LIB_NAME}.c -o ${BIN_DIR}/${LIB_NAME}.o ${RVV_LIB_CFLAG}
+	${RISCV_CC} -march=rv64gc ${LIB_SRC_DIR}/${LIB_NAME}.c -o ${BIN_DIR}/${LIB_NAME}.o ${RVV_LIB_CFLAG}
 	${RISCV_AR} crD ${LIB_DIR}/lib${LIB_NAME}.a ${BIN_DIR}/${LIB_NAME}.o
 
 run-riscv : app-riscv
